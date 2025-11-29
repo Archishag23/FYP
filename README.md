@@ -1,1 +1,1 @@
-# FYP
+# FYP - Graphs in Finance
