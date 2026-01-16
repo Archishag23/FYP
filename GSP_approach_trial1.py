@@ -14,21 +14,6 @@ sectors = pd.read_excel('SPX_sectors_data.xlsx',sheet_name='Sectors',header=0,in
 
 print("Sectors data loaded.")
 
-# volatility = prices.pct_change().rolling(window=21).std() * (252 ** 0.5)
-# volatility.dropna(how='all',inplace=True)
-
-# print("Volatility calculated.")
-
-# rolling_cov = prices.pct_change().rolling(window=21).cov()
-# rolling_cov.dropna(how='all',inplace=True)
-# rolling_cov.fillna(0, inplace=True)
-
-# print("Rolling covariance calculated.")
-
-# covariance_matrices = {
-#     date: rolling_cov.xs(date, level=0) for date in rolling_cov.index.get_level_values(0).unique()
-# }
-
 # memory issues with covariance, corr matrices for individual dates for stocks
 rolling_corr = prices.pct_change().rolling(window=50).corr()
 rolling_corr.dropna(how='all',inplace=True) 
