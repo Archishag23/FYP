@@ -1,0 +1,44 @@
+digraph Model {
+  layout=neato;
+  overlap=false;
+  splines=true;
+
+  node [shape=box, style="rounded,filled", fillcolor="white", fontsize=10];
+
+  /* ---- Stacked historical returns (z-axis illusion) ---- */
+  HR0 [label="Historical Returns\n(Window K)", pos="0,0!",    pin=true, fillcolor="#eeeeee"];
+  HR1 [label="Historical Returns\n(Window K)", pos="0.2,-0.2!", pin=true, fillcolor="#f5f5f5"];
+  HR2 [label="Historical Returns\n(Window K)", pos="0.4,-0.4!", pin=true, fillcolor="white", penwidth=1.4];
+
+  /* Invisible anchor for outgoing arrows */
+  HR [shape=point, width=0.01, pos="0.4,-0.4!", pin=true, style=invis];
+
+  HR2 -> HR [style=invis];
+
+  /* ---- Downstream nodes ---- */
+  Pearson [label="Pearson\nCorrelation", pos="2,0!", pin=true];
+  PCA     [label="Principal\nComponents", pos="2,-1!", pin=true];
+  GL      [label="Graph Learning\nLayer", pos="4,-0.5!", pin=true];
+  Adj     [label="A⁺ / A⁻\nAdjacency", pos="6,-0.5!", pin=true];
+
+  X       [label="Firm\nFundamentals X", pos="6,-2!", pin=true];
+
+  DC1     [label="Diffusion\nConvolution 1", pos="8,-1!", pin=true];
+  DC2     [label="Diffusion\nConvolution 2", pos="10,-1!", pin=true];
+  Dense   [label="Dense", pos="12,-1!", pin=true];
+  Y       [label="Output Ŷ", pos="14,-1!", pin=true];
+
+  /* ---- Arrows ---- */
+  HR -> Pearson;
+  HR -> PCA;
+  Pearson -> GL;
+  PCA -> GL;
+  GL -> Adj;
+  Adj -> DC1;
+  X -> DC1;
+  DC1 -> DC2 -> Dense -> Y;
+
+  /* ---- Time (z) arrow ---- */
+  Time [shape=plaintext, label="time (z)\n1 … t", pos="-1,0.5!", pin=true];
+  Time -> HR0 [color="#777777"];
+}
