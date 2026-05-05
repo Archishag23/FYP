@@ -568,18 +568,23 @@ class GNNStructEncoder(nn.Module):
         target_cov = target_cov + batch_eye
         generated_cov = generated_cov + batch_eye
 
-        det_target_cov = torch.linalg.det(target_cov)
-        det_generated_cov = torch.linalg.det(generated_cov)
+        # det + log approach (kept for reference; prone to NaN on near-singular matrices)
+        # det_target_cov = torch.linalg.det(target_cov)
+        # det_generated_cov = torch.linalg.det(generated_cov)
+        # if torch.any(det_generated_cov == 0):
+        #     raise ValueError(
+        #         "Generated Covariance contains zero values, which could lead to division by zero."
+        #     )
+        # log_det_ratio = torch.log(
+        #     (det_target_cov + epsilon) / (det_generated_cov + epsilon)
+        # )
+        # check_for_nan(log_det_ratio, "Log Determinant Ratio")
 
-        if torch.any(det_generated_cov == 0):
-            raise ValueError(
-                "Generated Covariance contains zero values, which could lead to division by zero."
-            )
-
-        log_det_ratio = torch.log(
-            (det_target_cov + epsilon) / (det_generated_cov + epsilon)
-        )
-        check_for_nan(log_det_ratio, "Log Determinant Ratio")
+        # slogdet is numerically stable: returns (sign, log|det|) without
+        # computing det explicitly, avoiding log(negative) NaN on near-singular matrices.
+        _, logdet_target = torch.linalg.slogdet(target_cov)
+        _, logdet_gen = torch.linalg.slogdet(generated_cov)
+        log_det_ratio = logdet_target - logdet_gen
 
         trace_term = torch.einsum(
             "bij,bji->b", torch.linalg.inv(generated_cov), target_cov
