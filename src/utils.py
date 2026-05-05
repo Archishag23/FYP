@@ -12,7 +12,7 @@ from scipy.linalg import sqrtm
 from sklearn.metrics import precision_recall_curve, auc
 
 
-def eval_pr_auc(targets, scores):
+def eval_pr_auc(targets, scores): # gives me AUC-PR score
     """
     targets: np.array
     scores: np.array
@@ -54,7 +54,7 @@ def check_for_extreme_values(tensor, threshold=1e-8, message="Tensor"):
         )
 
 
-def kl_divergence_multivar(mu_q, cov_q, mu_p, cov_p):
+def kl_divergence_multivar(mu_q, cov_q, mu_p, cov_p): # q is predcited and p is target distr
     # Inverse and determinant of the target covariance matrix
     inv_cov_p = torch.linalg.inv(cov_p)
     det_cov_p = torch.det(cov_p)
@@ -75,7 +75,7 @@ def kl_divergence_multivar(mu_q, cov_q, mu_p, cov_p):
     # KL divergence
     kl = 0.5 * (trace_term + quadratic_term - mu_q.size(-1) + log_det_term)
 
-    return kl.squeeze()
+    return kl.squeeze() # returns diff between the distributions
 
 
 def gen_joint_structural_outlier(data, m, n, random_state=None):
@@ -327,6 +327,9 @@ def remez_enc_approx(n, left, right, func):
 
 
 def remez_approx(n, left, right, wiener_func, penalty):
+    # diff to remez_enc_approx is that this one is for wiener kernel approximation, which requires a partial function with penalty as argument
+    # penalty is a hyperparameter that controls the trade-off between approximation accuracy and stability in the wiener kernel approximation. 
+    # A smaller penalty may lead to better approximation but can cause numerical instability, while a larger penalty can improve stability but may reduce approximation accuracy.
     """
     Compute the coefficients of nth-order remez polynomial approximation
     """
@@ -335,7 +338,7 @@ def remez_approx(n, left, right, wiener_func, penalty):
     points = remez_init(n, left, right)
 
     # Construct partial function
-    func = partial(wiener_func, penalty=penalty)
+    func = partial(wiener_func, penalty=penalty) 
 
     # Compute coefficients
     coefs = remez_step(n, points, func)
@@ -370,7 +373,10 @@ def KL_neighbor_loss(predictions, targets, mask_len, device):
         .matmul(mean_x2 - mean_x1)
     )
     KL_loss = KL_loss.to(device)
-    return KL_loss
+    return KL_loss # diff to kl_divergende_multivar as this one is for neighbor loss and the other 
+#one is for distribution diff loss, so this one adds an identity matrix to the covariance matrices 
+# to ensure they are positive definite and to prevent numerical instability during inversion and 
+# determinant calculation, while the other one does not add this regularization term.
 
 
 def W2_neighbor_loss(predictions, targets, mask_len, device):
@@ -390,4 +396,9 @@ def W2_neighbor_loss(predictions, targets, mask_len, device):
         cov_x1 + cov_x2 + 2 * sqrtm(sqrtm(cov_x1) @ (cov_x2.numpy()) @ (sqrtm(cov_x1)))
     )
 
-    return W2_loss
+    return W2_loss # diff to KL_neighbour_loss as this one calculates the Wasserstein-2 distance #
+#between the predicted and target distributions, which consists of two terms: the squared Euclidean
+#  distance between the means of the distributions and a term involving the covariance matrices 
+# that captures the difference in their shapes. The KL_neighbor_loss, on the other hand, c
+# alculates the Kullback-Leibler divergence, which measures how one probability distribution 
+# diverges from a second, expected probability distribution.

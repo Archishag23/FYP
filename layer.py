@@ -48,15 +48,15 @@ class Wave_prop(MessagePassing):
     def Haar(self, x, scale):
         # x are eigenvalues
         x[x < 0] = 0  # Set negetive values to 0.
-        start = 1 / self.K * scale 
-        end = start + 1 / self.K 
+        start = 1 / self.K * scale
+        end = start + 1 / self.K
 
         if end == 2:
             mask = torch.logical_and(x >= start, x <= end)
-        mask = torch.logical_and(x >= start, x < end) # if x is greater than or equal to start (start of the interval) and less than end - then is True
+        mask = torch.logical_and(x >= start, x < end)
         A = torch.where(mask, torch.ones_like(x), torch.zeros_like(x))
 
-        return A # A is the wavelet coeff for each eigenvalue
+        return A
 
     def Db2(self, x, translation):
         x[x < 0] = 0
@@ -75,7 +75,7 @@ class Wave_prop(MessagePassing):
             end = start + 1 / self.K
             if end == 2:
                 mask = torch.logical_and(x >= start, x <= end)
-            mask = torch.logical_and(x >= start, x < end) # not inclusive as above
+            mask = torch.logical_and(x >= start, x < end)
             A += torch.where(mask, h[k] * torch.ones_like(x), torch.zeros_like(x))
 
         return A
