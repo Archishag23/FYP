@@ -1,0 +1,5 @@
+outputs/*.pt
+outputs/*.db
+outputs/*.pkl
+outputs/bo_caches/
+
